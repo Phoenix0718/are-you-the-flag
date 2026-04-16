@@ -60,13 +60,22 @@
       border-radius: 5px;
       width: 0%;
     }
+
+    .disclaimer {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-top: 30px;
+      padding: 15px;
+      background: #1e293b;
+      border-radius: 8px;
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
     <h1>🚦 Are You the Flag?</h1>
-    <p>Be honest. No one’s watching 👀</p>
+    <p>Be honest. No one's watching 👀</p>
 
     <div class="progress">
       <div id="progressBar" class="progress-bar"></div>
@@ -74,12 +83,16 @@
 
     <div id="quiz" class="card"></div>
     <div id="result" class="card hidden"></div>
+
+    <p class="disclaimer">
+      Disclaimer: This is for self-reflection, not professional advice.
+    </p>
   </div>
 
   <script>
     const questions = [
       {
-        q: "Do you get upset when someone doesn’t reply quickly?",
+        q: "Do you get upset when someone doesn't reply quickly?",
         options: [
           { text: "No, I understand people are busy", score: 2 },
           { text: "Sometimes, depends", score: 1 },
@@ -87,7 +100,7 @@
         ]
       },
       {
-        q: "Do you respect ‘no’ without pushing?",
+        q: "Do you respect 'no' without pushing?",
         options: [
           { text: "Always", score: 2 },
           { text: "I try but sometimes push", score: 1 },
@@ -152,10 +165,10 @@
 
       if (score >= 7) {
         emoji = "🟢";
-        message = "You’re emotionally aware & respect boundaries. Green flag energy.";
+        message = "You're emotionally aware & respect boundaries. Green flag energy.";
       } else if (score >= 4) {
         emoji = "🟡";
-        message = "You’re growing. Some patterns to reflect on, but you're getting there.";
+        message = "You're growing. Some patterns to reflect on, but you're getting there.";
       } else {
         emoji = "🔥";
         message = "Time for reflection. Growth starts with awareness, not shame.";
@@ -173,6 +186,3 @@
   </script>
 </body>
 </html>
-<p style="font-size: 12px; opacity: 0.6;">
-Disclaimer: This is for self-reflection, not professional advice.
-</p>
