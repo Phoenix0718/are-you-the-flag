@@ -1,26 +1,320 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Are You the Flag?</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Are You the Flag?</title>
+
+<style>
+body {
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #f5efe6, #efe6d8);
+  color: #3e2f1c;
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+}
+
+.container {
+  max-width: 650px;
+  margin: auto;
+}
+
+h1 {
+  color: #c9a227;
+  font-size: 34px;
+}
+
+.card {
+  background: #fffaf3;
+  padding: 25px;
+  border-radius: 18px;
+  margin-top: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  animation: fadeIn 0.4s ease;
+}
+
+button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #c9a227, #e6c65c);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+.progress {
+  height: 12px;
+  background: #e5dccf;
+  border-radius: 10px;
+  margin-top: 15px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 12px;
+  background: linear-gradient(to right, #ff4d4d, #ffd966, #4caf50);
+  border-radius: 10px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.hidden {
+  display: none;
+}
+
+canvas {
+  margin-top: 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+.disclaimer {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 20px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+</style>
 </head>
+
 <body>
-<h1>🚦 Are You the Flag?</h1>
-<p><b>Hot take:</b> you might not like your result 😭</p>
-<p style="opacity:0.7;">Answer honestly. No one's judging… except the algorithm 👀</p>
 
-<!-- Existing content starts here -->
+<div class="container">
+  <h1>🚦 Are You the Flag?</h1>
+  <p><b>Hot take:</b> you might not like your result 😭</p>
+  <p style="opacity:0.7;">Answer honestly. No one’s judging… except the algorithm 👀</p>
 
-<p>Welcome to the quiz!</p>
-<form action="submit-answer" method="POST">
-    <label for="answer">Your answer:</label>
-    <input type="text" id="answer" name="answer">
-    <button type="submit">Submit</button>
-</form>
+  <div class="progress">
+    <div id="progressBar" class="progress-bar"></div>
+  </div>
+  <p id="progressText"></p>
 
-<!-- Existing content ends here -->
+  <div id="quiz" class="card"></div>
+  <div id="result" class="card hidden"></div>
+
+  <canvas id="shareCanvas" width="400" height="400" class="hidden"></canvas>
+
+  <p class="disclaimer">For self-reflection only. Not professional advice.</p>
+</div>
+
+<script>
+
+const questions = [
+{q:"They don’t reply for hours. You:",options:[
+{text:"Go live your life",score:2,insight:"Secure attachment energy."},
+{text:"Feel uneasy",score:1,insight:"You're aware, keep growing."},
+{text:"Spiral + double text",score:0,insight:"Anxiety drives patterns."}]},
+
+{q:"Do you respect ‘no’?",options:[
+{text:"Always",score:2,insight:"Consent = baseline."},
+{text:"Sometimes push",score:1,insight:"Notice the pattern."},
+{text:"Convince them",score:0,insight:"Boundary violation."}]},
+
+{q:"Jealousy?",options:[
+{text:"Communicate calmly",score:2,insight:"Healthy expression."},
+{text:"Hint indirectly",score:1,insight:"Clarity matters."},
+{text:"Passive-aggressive",score:0,insight:"Avoidance harms."}]},
+
+{q:"Check their phone?",options:[
+{text:"Never",score:2,insight:"Respect privacy."},
+{text:"Sometimes",score:1,insight:"Trust needs work."},
+{text:"Yes",score:0,insight:"Control ≠ care."}]},
+
+{q:"They ask for space:",options:[
+{text:"Respect it",score:2,insight:"Healthy boundaries."},
+{text:"Feel anxious but try",score:1,insight:"Growth zone."},
+{text:"Ignore it",score:0,insight:"Pressure harms."}]},
+
+{q:"Arguments:",options:[
+{text:"Talk it out",score:2,insight:"Growth mindset."},
+{text:"Avoid",score:1,insight:"Delays healing."},
+{text:"Win at all costs",score:0,insight:"Ego wins, relationship loses."}]},
+
+{q:"Do you guilt-trip?",options:[
+{text:"Never",score:2,insight:"Emotional safety matters."},
+{text:"Sometimes",score:1,insight:"Be mindful."},
+{text:"Often",score:0,insight:"Manipulation alert."}]},
+
+{q:"Do you expect constant updates?",options:[
+{text:"No",score:2,insight:"Autonomy matters."},
+{text:"Sometimes",score:1,insight:"Balance needed."},
+{text:"Yes",score:0,insight:"Control tendency."}]},
+
+{q:"When hurt, you:",options:[
+{text:"Express clearly",score:2,insight:"Clarity builds trust."},
+{text:"Withdraw",score:1,insight:"Distance grows."},
+{text:"Blame them",score:0,insight:"Avoid accountability."}]},
+
+{q:"Do you apologize sincerely?",options:[
+{text:"Yes",score:2,insight:"Growth energy."},
+{text:"Sometimes",score:1,insight:"Work on it."},
+{text:"No",score:0,insight:"Defensive pattern."}]},
+
+{q:"Do you respect differences?",options:[
+{text:"Yes",score:2,insight:"Individuality wins."},
+{text:"Depends",score:1,insight:"Flexibility needed."},
+{text:"No",score:0,insight:"Control kills authenticity."}]},
+
+{q:"Do you overthink texts?",options:[
+{text:"No",score:2,insight:"Clarity over assumptions."},
+{text:"Sometimes",score:1,insight:"Be aware."},
+{text:"Always",score:0,insight:"False narratives."}]},
+
+{q:"Do you need constant reassurance?",options:[
+{text:"Healthy amount",score:2,insight:"Balanced attachment."},
+{text:"Sometimes",score:1,insight:"Regulate it."},
+{text:"Constantly",score:0,insight:"Dependency strain."}]},
+
+{q:"Do you respect privacy?",options:[
+{text:"Yes",score:2,insight:"Trust is built on respect."},
+{text:"Mostly",score:1,insight:"Consistency matters."},
+{text:"No",score:0,insight:"Boundary issue."}]},
+
+{q:"Do you communicate expectations?",options:[
+{text:"Clearly",score:2,insight:"Clarity prevents conflict."},
+{text:"Sometimes",score:1,insight:"Improve consistency."},
+{text:"Assume",score:0,insight:"Mind-reading fails."}]},
+
+{q:"Do you take accountability?",options:[
+{text:"Yes",score:2,insight:"Growth mindset."},
+{text:"Sometimes",score:1,insight:"Be consistent."},
+{text:"No",score:0,insight:"Blame loop."}]},
+
+{q:"Do you listen actively?",options:[
+{text:"Yes",score:2,insight:"Listening = respect."},
+{text:"Sometimes",score:1,insight:"Be present."},
+{text:"No",score:0,insight:"Disconnect grows."}]},
+
+{q:"Do you handle rejection maturely?",options:[
+{text:"Yes",score:2,insight:"Emotional maturity."},
+{text:"Struggle sometimes",score:1,insight:"Work on ego."},
+{text:"React badly",score:0,insight:"Entitlement pattern."}]},
+
+{q:"Do you respect time boundaries?",options:[
+{text:"Yes",score:2,insight:"Respect = care."},
+{text:"Sometimes",score:1,insight:"Improve awareness."},
+{text:"No",score:0,insight:"Disrespect pattern."}]},
+
+{q:"Do you reflect on your behavior?",options:[
+{text:"Often",score:2,insight:"Self-awareness is power."},
+{text:"Sometimes",score:1,insight:"Keep growing."},
+{text:"Rarely",score:0,insight:"Growth blocked."}]}
+];
+
+let current = 0;
+let score = 0;
+let finalMessage = "";
+
+const quizDiv = document.getElementById("quiz");
+const resultDiv = document.getElementById("result");
+const progressBar = document.getElementById("progressBar");
+
+function loadQuestion() {
+  const q = questions[current];
+
+  progressBar.style.width = ((current / questions.length) * 100) + "%";
+  document.getElementById("progressText").innerText =
+    `Question ${current + 1} / ${questions.length}`;
+
+  quizDiv.innerHTML = `
+    <h2>${q.q}</h2>
+    ${q.options.map(opt =>
+      `<button onclick="selectOption(${opt.score}, '${opt.insight}')">${opt.text}</button>`
+    ).join("")}
+  `;
+}
+
+function selectOption(points, insight) {
+  score += points;
+
+  quizDiv.innerHTML = `
+    <h3>${insight}</h3>
+    <button onclick="nextQuestion()">Next →</button>
+  `;
+}
+
+function nextQuestion() {
+  current++;
+  if (current < questions.length) loadQuestion();
+  else showResult();
+}
+
+function showResult() {
+  quizDiv.classList.add("hidden");
+  resultDiv.classList.remove("hidden");
+
+  let emoji = "";
+
+  if (score >= 30) {
+    emoji = "🟢";
+    finalMessage = "Green Flag Energy 💅";
+  } else if (score >= 15) {
+    emoji = "🟡";
+    finalMessage = "Work in Progress 👀";
+  } else {
+    emoji = "🔴";
+    finalMessage = "Time for reflection bestie 😭";
+  }
+
+  resultDiv.innerHTML = `
+    <h2>${emoji} ${finalMessage}</h2>
+    <p>Score: ${score}</p>
+
+    <button onclick="generateCard()">📸 Save IG Story</button>
+    <button onclick="shareWhatsApp()">📤 Send to Bestie 👀</button>
+    <button onclick="location.reload()">🔁 Play Again</button>
+  `;
+}
+
+function generateCard() {
+  const canvas = document.getElementById("shareCanvas");
+  canvas.classList.remove("hidden");
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#fffaf3";
+  ctx.fillRect(0,0,400,400);
+
+  ctx.fillStyle = "#c9a227";
+  ctx.font = "bold 24px Arial";
+  ctx.fillText("Are You the Flag?", 60, 80);
+
+  ctx.fillStyle = "#3e2f1c";
+  ctx.font = "20px Arial";
+  ctx.fillText(finalMessage, 80, 200);
+
+  ctx.font = "16px Arial";
+  ctx.fillText("Score: " + score, 140, 250);
+  ctx.fillText("Tag your bestie 👀", 110, 320);
+
+  const link = document.createElement("a");
+  link.download = "result.png";
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+function shareWhatsApp() {
+  const text = `I got "${finalMessage}" 🚦 Try this 👀: ${window.location.href}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
+}
+
+loadQuestion();
+
+</script>
 
 </body>
 </html>
