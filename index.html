@@ -225,6 +225,12 @@ const resultDiv = document.getElementById("result");
 const progressBar = document.getElementById("progressBar");
 
 function loadQuestion() {
+  // Add this after loadQuestion() function
+document.addEventListener("click", function(e) {
+  if (e.target.classList.contains("option-btn")) {
+    selectOption(parseInt(e.target.dataset.score), e.target.dataset.insight);
+  }
+});
   const q = questions[current];
 
   progressBar.style.width = ((current / questions.length) * 100) + "%";
@@ -234,7 +240,7 @@ function loadQuestion() {
   quizDiv.innerHTML = `
     <h2>${q.q}</h2>
     ${q.options.map(opt =>
-      `<button onclick="selectOption(${opt.score}, '${opt.insight}')">${opt.text}</button>`
+     `<button class="option-btn" data-score="${opt.score}" data-insight="${opt.insight}">${opt.text}</button>`
     ).join("")}
   `;
 }
